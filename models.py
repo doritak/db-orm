@@ -1,13 +1,13 @@
 import os
 from sqlalchemy import create_engine, text, Column, String, Integer
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import declarative_base
 
 # # Cargar las variables desde el archivo .env
 # from dotenv import load_dotenv
 # load_dotenv()
 
 # Crear el motor y base de datos
-DATABASE_NAME = "Ferreteria"
+DATABASE_NAME = "ferreteria"
 USERNAME = "root"        # Cambiar por tu usuario de MySQL
 PASSWORD = os.getenv("DB_PASSWORD")  # Recupera la contraseña desde las variables de entorno
 HOST = "localhost"
@@ -18,7 +18,7 @@ if not PASSWORD:
 
 
 # Crear un motor inicial sin base de datos específica
-server_engine = create_engine(f"mysql+mysqlconnector://{USERNAME}:{PASSWORD}@{HOST}:{PORT}", echo=True)
+engine = create_engine(f"mysql+mysqlconnector://{USERNAME}:{PASSWORD}@{HOST}:{PORT}", echo=True)
 
 # Base de modelos
 Base = declarative_base()
@@ -28,18 +28,29 @@ class Proveedor(Base):
     __tablename__ = "proveedores"
     
     rut = Column(String(12), primary_key=True)  # Clave primaria, RUT
-    dv = Column(String(1), primary_key=True)
-    nombre_proveedor = Column(String(100), nullable=False)
-    razon_social = Column(String(150), nullable=False)
+    nombre_proveedor = Column(String(120), nullable=False)
+    vencimiento = Column(Integer)
+    nombre_corto = Column(String(100))
     nombre_vendedor = Column(String(100))
-    direccion_proveedor = Column(String(200))
-    correo_vendedor = Column(String(100))
-    telefono_vendedor = Column(String(15))
-    forma_pago = Column(String(50))
-    dias_vencimiento = Column(Integer)
-    banco = Column(String(50))
-    nro_cuenta_bancaria = Column(String(50))
-    correo_pago = Column(String(100))
+    telefono_vendedor = Column(String(60))
+    correo_vendedor = Column(String(120))
+    correo_vendedor2 = Column(String(120))
+    correo_pago = Column(String(120))
+    tipo_flete = Column(String(120))
+    transporte = Column(String(120))
+    
+    def __init__(self, rut, nombre_proveedor, vencimiento, nombre_corto, nombre_vendedor, telefono_vendedor, correo_vendedor, correo_vendedor2, correo_pago, tipo_flete, transporte):
+        self.rut = rut
+        self.nombre_proveedor = nombre_proveedor
+        self.vencimiento = vencimiento
+        self.nombre_corto = nombre_corto
+        self.nombre_vendedor = nombre_vendedor
+        self.telefono_vendedor = telefono_vendedor
+        self.correo_vendedor = correo_vendedor
+        self.correo_vendedor2 = correo_vendedor2
+        self.correo_pago = correo_pago
+        self.tipo_flete = tipo_flete
+        self.transporte = transporte
     
     def __repr__(self):
         return f"<Proveedor(rut={self.rut,"-",self.dv}, nombre_proveedor={self.nombre_proveedor})>"
@@ -48,14 +59,20 @@ class Proveedor(Base):
 # Crear la base de datos y las tablas
 def create_database():
     # Crear conexión al servidor MySQL
-    with server_engine.connect() as connection:
+    with engine.connect() as connection:
         # Crear la base de datos si no existe
         connection.execute(text(f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME}"))
-        #connection.execute(text(f"USE {DATABASE_NAME}"))
+        connection.execute(text(f"USE {DATABASE_NAME}"))
     
     # Crear las tablas
     db_engine = create_engine(f"mysql+mysqlconnector://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE_NAME}", echo=True)
     Base.metadata.create_all(db_engine)
+    
+    
 
+
+    
+    
 if __name__ == "__main__":
     create_database()
+    
